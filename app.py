@@ -2,6 +2,8 @@ import seaborn as sns
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import json
+import plotly.graph_objects as go
 
 try:
     df = pd.read_csv("crime_data_2010_1012.csv")
@@ -13,7 +15,7 @@ df['District'] = df['District'].astype(str)
 
 # shortening district names
 district_mapping = {
-    'Badulla (Badulla & Bandarawela)': 'Badulla',
+    'Badulla (Badulla & Bandarawela )': 'Badulla',
     'Colombo (Colombo South, North, Central) Mt. Laviniya, Nugegoda': 'Colombo',
     'Galle (Galle/Elpitiya)': 'Galle',
     'Gampaha (Kelaniya/Gampha/Negombo Div)': 'Gampaha',
@@ -21,10 +23,10 @@ district_mapping = {
     'Jaffna(Jaffna, KKS)': 'Jaffna',
     'Kalutara (Kalutara,Panadura)': 'Kalutara',
     'Kandy (Kandy, Gampola)': 'Kandy',
+    'Mannar ':'Mannar',
     'Kegalle (Kegalle, Sithawakapura0': 'Kegalle',
     'Kilinochchi (Kilinochchi, Mankulam )': 'Kilinochchi',
     'Kurunegala (Kurunegala, Kuliyapitiya, Nikaweratiya )': 'Kurunegala',
-
     'Nuwara Eliya (Hatton, Nuwara Eliya )':'Nuwara Eliya',
     'Puttlam (Puttlam, Chilaw )': 'Puttalam',
     'Trincomalee (Kantale, Trincomalee )': 'Trincomalee',}
@@ -102,3 +104,58 @@ try:
     st.plotly_chart(fig, use_container_width=True)
 except Exception as e:
         st.error(f"An error occurred: {e}")
+
+#geographical distribution of crime by map
+st.header("3. Geographical Distribution of Crime by Map")
+selected_year = st.selectbox("Select Year", options=['2010', '2011', '2012'], key="year_selector_1")
+selected_year = int(selected_year)
+
+try:
+    district_corrections = {
+    'Mulathivu': 'Mullaitivu',
+    'Mulllativu': 'Mullaitivu',}
+    df['District'] = df['District'].replace(district_corrections)
+
+    df['District'] = df['District'].str.strip().str.title() + " District"
+
+    df['Crime Rate'] = (df[str(selected_year)] / df['Population']) * 100000
+
+    with open("geoBoundaries-LKA-ADM2.geojson", "r") as f:
+        sri_lanka_map = json.load(f)
+
+    district_crime_counts = df.groupby('District')[str(selected_year)].sum().reset_index()
+    district_crime_counts = district_crime_counts.rename(columns={str(selected_year): 'Total Crimes'})
+    total_crimes = district_crime_counts['Total Crimes'].sum()
+    district_crime_counts['Crime Percentage'] = (district_crime_counts['Total Crimes'] / total_crimes) * 100
+
+    MAPBOX_TOKEN = "pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndjZ3bWl3N3gifQ._7RTFeGZ0dY-NU8U6GI2wQ"
+    map_center = {"lat": 7.8731, "lon": 80.7718}
+
+    fig = go.Figure(go.Choroplethmapbox(
+        geojson=sri_lanka_map,
+        locations=district_crime_counts['District'],
+        z=district_crime_counts['Crime Percentage'],
+        featureidkey="properties.shapeName",
+        colorscale="Reds",
+        colorbar_title="Crime %",
+        marker_opacity=0.6,
+        marker_line_width=1,
+        hovertext=district_crime_counts['District'],
+        hoverinfo="text+z"
+    ))
+
+    fig.update_layout(
+        mapbox_style="carto-positron",
+        mapbox_zoom=6.2,
+        mapbox_center=map_center,
+        mapbox_accesstoken=MAPBOX_TOKEN,
+        margin={"r": 0, "t": 30, "l": 0, "b": 0},
+        height=600,
+        title=f"Crime Distribution in Sri Lanka - {selected_year}"
+    )
+
+    st.plotly_chart(fig, use_container_width=True)
+
+except Exception as e:
+    st.error(f"An error occurred: {e}")
+
