@@ -17,3 +17,9 @@ st.write("This dashboard provides an interactive insights of crime statistics in
 st.write("Here's a inital glance at the data:")
 st.dataframe(df.head())
 
+print(px.__version__)
+
+#summary stats
+st.write("Here's a summary of the data:")
+st.dataframe(df.describe())
+
