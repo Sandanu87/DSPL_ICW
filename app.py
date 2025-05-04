@@ -23,7 +23,14 @@ st.dataframe(df.describe())
 
 #Crime trends overtime
 st.header("1. Crime Rate Trends Over Time")
-selected_crime_categories = st.multiselect("Select Crime Categories", options=df['Crime Category'].unique(), default=['Murder', 'Theft of Property Including praedial produce over Rs . 5000 / & cycle cattle theft Irrespective of their value'])
+options = df['Crime Category'].unique().tolist()
+default_values = [
+    val for val in [
+        'Murder',
+        'Theft of Property Including praedial produce over Rs . 5000 / & cycle cattle theft Irrespective of their value'] if val in options]
+selected_crime_categories = st.multiselect("Select Crime Categories",
+    options=options,
+    default=default_values)
 
 if not selected_crime_categories:
     st.warning("Please select at least one crime category to display the chart.")
