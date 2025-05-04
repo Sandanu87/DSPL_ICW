@@ -197,3 +197,28 @@ fig = px.scatter(
     title="Scatter Plot: Population vs. Crime, Colored by Crime Category",)
 
 st.plotly_chart(fig)
+
+#top and bottom 5 
+st.header("5. Top and Bottom 5 Districts by Crime Rate")
+selected_year_rate = st.selectbox("Select Year", options=['2010', '2011', '2012'], key="year_rate")
+selected_year_rate = int(selected_year_rate)
+
+try:
+    df_rate = df.copy()
+    df_rate['Crime Rate'] = (df_rate[str(selected_year_rate)] / df_rate['Population']) * 100000
+    df_rate = df_rate[['District', 'Crime Rate']].sort_values(by='Crime Rate')
+
+    top_5_districts = df_rate.head(5)
+    bottom_5_districts = df_rate.tail(5)
+
+    col1, col2 = st.columns(2)
+    with col1:
+        st.subheader(f"Top 5 Districts in {selected_year_rate}")
+        st.dataframe(top_5_districts, height=200)
+
+    with col2:
+        st.subheader(f"Bottom 5 Districts in {selected_year_rate}")
+        st.dataframe(bottom_5_districts, height=200)
+
+except Exception as e:
+    st.error(f"An error occurred: {e}")
