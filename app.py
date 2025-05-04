@@ -199,7 +199,7 @@ fig = px.scatter(
 st.plotly_chart(fig)
 
 #top and bottom 5 
-st.header("5. Top and Bottom 5 Districts by Crime Rate")
+st.header("6. Top and Bottom 5 Districts by Crime Rate")
 selected_year_rate = st.selectbox("Select Year", options=['2010', '2011', '2012'], key="year_rate")
 selected_year_rate = int(selected_year_rate)
 
@@ -220,5 +220,33 @@ try:
         st.subheader(f"Bottom 5 Districts in {selected_year_rate}")
         st.dataframe(bottom_5_districts, height=200)
 
+except Exception as e:
+    st.error(f"An error occurred: {e}")
+
+#animated Chart over time
+st.header("7. Animated Crime Trends by District")
+try:
+    df_melted_animated = df.melt(id_vars=['District', 'Population'], value_vars=['2010', '2011', '2012'], var_name='Year',
+                                 value_name='Cases')
+    df_melted_animated['Year'] = pd.to_numeric(
+        df_melted_animated['Year'])
+
+    df_melted_animated['Crime Rate'] = (df_melted_animated['Cases'] / df_melted_animated['Population']) * 100000
+
+    fig_animated = px.bar(df_melted_animated,
+                             x='District',
+                             y='Crime Rate',
+                             color='District',
+                             animation_frame='Year',
+                             range_y=[0, df_melted_animated['Crime Rate'].max() * 1.1],
+                             title='Annual Crime Rate per 100,000 Population by District',
+                             labels={'Year': 'Year', 'Crime Rate': 'Crime Rate (per 100,000)'})
+
+    fig_animated.update_layout(
+        transition=dict(duration=300, easing="cubic-in-out"),
+        height=700
+    )
+
+    st.plotly_chart(fig_animated, use_container_width=True)
 except Exception as e:
     st.error(f"An error occurred: {e}")
