@@ -11,6 +11,36 @@ except FileNotFoundError:
 
 df['District'] = df['District'].astype(str)
 
+#shotening crime names
+crime_category_mapping = {
+    'Abduction / Kidnapping': 'Abduction/Kidnap',
+    'Theft of Property Including praedial produce over Rs . 5000 / & cycle cattle theft Irrespective of their value': 'Theft > 5000',
+    'All other thefts': 'Other Thefts',
+    'Assaults': 'Assault',
+    'Attempted Murder': 'Attempted Murder',
+    'Bribery': 'Bribery',
+    'Burglary': 'Burglary',
+    'Cheating': 'Cheating',
+    'Criminal Trespass': 'Criminal Trespass',
+    'Damaging Private Property': 'Damage Property',
+    'Extortion': 'Extortion',
+    'Grave Robbery': 'Grave Robbery',
+    'Homicide': 'Homicide',
+    'House Breaking': 'House Breaking',
+    'Human trafficking': 'Human trafficking',
+    'Murder': 'Murder',
+    'Other': 'Other',
+    'Other offences against': 'Other offences against',
+    'Possession of Ganja': 'Possession of Ganja',
+    'Rape': 'Rape',
+    'Rioting': 'Rioting',
+    'Robbery': 'Robbery',
+    'Sexual Harassment': 'Sexual Harassment',
+    'Theft of Motor Vehicle': 'Vehicle Theft',
+    'Theft of Property Including praedial produce Rs. 5000/- and below': 'Theft <= 5000'
+}
+df['Crime Category'] = df['Crime Category'].replace(crime_category_mapping)
+
 #inital view of the dataset
 st.title("Sri Lankan Crime Statistics Dashboard")
 st.write("This dashboard provides an interactive insights of crime statistics in Sri Lanka. This allows users to explore crime trends, geographical distribution and overall summaries which enables data driven decision making for government authorities. ")
@@ -68,7 +98,7 @@ try:
                  color='Crime Category',
                  hover_data=['District', 'Crime Category', 'Crime Rate'],
                  title=f'Geographical Distribution of Crime in {selected_year}')
-    fig.update_layout(width=800, height=500)
+    fig.update_layout(width=800, height=500, legend=dict(font=dict(size=10)))
     st.plotly_chart(fig, use_container_width=True)
 except Exception as e:
-        st.error(f"An error occurred while creating the chart: {e}")
+        st.error(f"An error occurred: {e}")
