@@ -54,3 +54,21 @@ else:
         st.plotly_chart(fig, use_container_width=True)
     except Exception as e:
         st.error(f"An error occurred while creating the chart: {e}")
+
+#geographical distribution of crime
+st.header("2. Geographical Distribution of Crime")
+selected_year = st.selectbox("Select Year", options=['2010', '2011', '2012'], index=0)
+selected_year = int(selected_year)
+
+try:
+    df['Crime Rate'] = (df[str(selected_year)] / df['Population']) * 100000
+    fig = px.bar(df,
+                 x='District',
+                 y='Crime Rate',
+                 color='Crime Category',
+                 hover_data=['District', 'Crime Category', 'Crime Rate'],
+                 title=f'Geographical Distribution of Crime in {selected_year}')
+    fig.update_layout(width=800, height=500)
+    st.plotly_chart(fig, use_container_width=True)
+except Exception as e:
+        st.error(f"An error occurred while creating the chart: {e}")
