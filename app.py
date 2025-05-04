@@ -10,3 +10,10 @@ except FileNotFoundError:
     st.stop()
 
 df['District'] = df['District'].astype(str)
+
+#inital view of the dataset
+st.title("Sri Lankan Crime Statistics Dashboard")
+st.write("This dashboard provides an interactive visualization of crime statistics in Sri Lanka.")
+st.write("Here's a first look at the data:")
+st.dataframe(df.head())
+
