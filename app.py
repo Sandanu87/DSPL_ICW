@@ -53,8 +53,26 @@ st.dataframe(df.head())
 st.write("Here's a summary of the data:")
 st.dataframe(df.describe())
 
+#crime trends overtime by district
+st.header("1. Crime Trends Over Time by District")
+try:
+    df_melted = df.melt(id_vars=['District'], value_vars=['2010', '2011', '2012'], var_name='Year', value_name='Total Crimes')
+    df_melted['Year'] = pd.to_numeric(df_melted['Year']) 
+
+    selected_district = st.selectbox("Select a District", df_melted['District'].unique())
+
+    district_data = df_melted[df_melted['District'] == selected_district]
+
+    fig = px.bar(district_data, x='Year', y='Total Crimes',
+                  title=f'Crime Trends in {selected_district}',
+                  labels={'Year': 'Year', 'Total Crimes': 'Total Crimes'}) 
+    st.plotly_chart(fig, use_container_width=True) 
+
+except Exception as e:
+    st.error(f"An error occurred: {e}")
+
 #Crime trends overtime
-st.header("1. Crime Rate Trends Over Time")
+st.header("2. Crime Rate Trends Over Time")
 options = df['Crime Category'].unique().tolist()
 default_values = [
     val for val in [
@@ -88,7 +106,7 @@ else:
         st.error(f"An error occurred while creating the chart: {e}")
 
 #geographical distribution of crime
-st.header("2. Geographical Distribution of Crime")
+st.header("3. Geographical Distribution of Crime")
 selected_year = st.selectbox("Select Year", options=['2010', '2011', '2012'], index=0)
 selected_year = int(selected_year)
 
@@ -106,7 +124,7 @@ except Exception as e:
         st.error(f"An error occurred: {e}")
 
 #geographical distribution of crime by map
-st.header("3. Geographical Distribution of Crime by Map")
+st.header("4. Geographical Distribution of Total Crime Percentage by Year")
 selected_year = st.selectbox("Select Year", options=['2010', '2011', '2012'], key="year_selector_1")
 selected_year = int(selected_year)
 
@@ -159,3 +177,23 @@ try:
 except Exception as e:
     st.error(f"An error occurred: {e}")
 
+#population vs crime count
+st.header("5.Crime vs. Population by Category")
+df.columns = df.columns.str.strip()
+
+df["Population"] = pd.to_numeric(df["Population"], errors='coerce')
+df["Crimes Over the Years"] = pd.to_numeric(df["Crimes Over the Years"], errors='coerce')
+df["Crime Percentage"] = pd.to_numeric(df["Crime Percentage"], errors='coerce')
+
+df = df.dropna(subset=["Population", "Crimes Over the Years", "Crime Percentage", "Crime Category"])
+
+fig = px.scatter(
+    df,
+    x="Population",
+    y="Crimes Over the Years",
+    color="Crime Category",
+    size="Crime Percentage",
+    hover_data=["District"],
+    title="Scatter Plot: Population vs. Crime, Colored by Crime Category",)
+
+st.plotly_chart(fig)
