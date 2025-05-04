@@ -11,6 +11,25 @@ except FileNotFoundError:
 
 df['District'] = df['District'].astype(str)
 
+# shortening district names
+district_mapping = {
+    'Badulla (Badulla & Bandarawela)': 'Badulla',
+    'Colombo (Colombo South, North, Central) Mt. Laviniya, Nugegoda': 'Colombo',
+    'Galle (Galle/Elpitiya)': 'Galle',
+    'Gampaha (Kelaniya/Gampha/Negombo Div)': 'Gampaha',
+    'Hambanthota (Tangalle )': 'Hambantota',
+    'Jaffna(Jaffna, KKS)': 'Jaffna',
+    'Kalutara (Kalutara,Panadura)': 'Kalutara',
+    'Kandy (Kandy, Gampola)': 'Kandy',
+    'Kegalle (Kegalle, Sithawakapura0': 'Kegalle',
+    'Kilinochchi (Kilinochchi, Mankulam )': 'Kilinochchi',
+    'Kurunegala (Kurunegala, Kuliyapitiya, Nikaweratiya )': 'Kurunegala',
+
+    'Nuwara Eliya (Hatton, Nuwara Eliya )':'Nuwara Eliya',
+    'Puttlam (Puttlam, Chilaw )': 'Puttalam',
+    'Trincomalee (Kantale, Trincomalee )': 'Trincomalee',}
+df['District'] = df['District'].replace(district_mapping)
+
 #shotening crime names
 crime_category_mapping = {
     'Abduction / Kidnapping': 'Abduction/Kidnap',
@@ -37,8 +56,7 @@ crime_category_mapping = {
     'Robbery': 'Robbery',
     'Sexual Harassment': 'Sexual Harassment',
     'Theft of Motor Vehicle': 'Vehicle Theft',
-    'Theft of Property Including praedial produce Rs. 5000/- and below': 'Theft <= 5000'
-}
+    'Theft of Property Including praedial produce Rs. 5000/- and below': 'Theft <= 5000'}
 df['Crime Category'] = df['Crime Category'].replace(crime_category_mapping)
 
 #inital view of the dataset
