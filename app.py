@@ -16,6 +16,7 @@ except FileNotFoundError:
 df['District'] = df['District'].astype(str)
 
 st.title("Sri Lankan Crime Statistics Dashboard")
+st.write("This dashboard provides an interactive insights of crime statistics in Sri Lanka. This allows users to explore crime trends, geographical distribution and overall summaries which enables data driven decision making for government authorities. ")
 
 # shortening district names
 district_mapping = {
@@ -61,9 +62,69 @@ page = st.sidebar.radio("Select a Page", [
 #inital view of the dataset
 if page == "Home Page":
     st.header("Initial overview of the data")
-    st.write("This dashboard provides an interactive insights of crime statistics in Sri Lanka. This allows users to explore crime trends, geographical distribution and overall summaries which enables data driven decision making for government authorities. ")
     st.write("Here's a inital glance at the data:")
     st.dataframe(df.head())
+
+    total_population = df[['District', 'Population']].drop_duplicates()['Population'].sum()
+    total_crime_categories = df["Crime Category"].nunique()
+    total_districts = df["District"].nunique()
+    total_2011 = df['2011'].sum()
+    total_2010 = df['2010'].sum()
+    total_2012 = df['2012'].sum()
+
+    # Display stats
+    st.header("Key Statistics")
+    col1, col2, col3 = st.columns(3) 
+    col1.markdown(
+        f"""
+        <div style="background-color: #e0f7fa; border-left: 4px solid #00bcd4; padding: 10px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 16px; color: #00897b;"><strong>Total Population:</strong> {total_population:,}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    col2.markdown(
+        f"""
+        <div style="background-color: #e0f7fa; border-left: 4px solid #00bcd4; padding: 10px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 16px; color: #00897b;"><strong>Total Crime Categories:</strong> {total_crime_categories}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    col3.markdown(
+        f"""
+        <div style="background-color: #e0f7fa; border-left: 4px solid #00bcd4; padding: 10px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 16px; color: #00897b;"><strong>Total Districts:</strong> {total_districts}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    col4, col5, col6 = st.columns(3)
+    col4.markdown(
+        f"""
+        <div style="background-color: #e0f7fa; border-left: 4px solid #00bcd4; padding: 10px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 16px; color: #00897b;"><strong>Total Crimes in 2010:</strong> {total_2010:,}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    col5.markdown(
+        f"""
+         <div style="background-color: #e0f7fa; border-left: 4px solid #00bcd4; padding: 10px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 16px; color: #00897b;"><strong>Total Crimes in 2011:</strong> {total_2011:,}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+    col6.markdown(
+        f"""
+         <div style="background-color: #e0f7fa; border-left: 4px solid #00bcd4; padding: 10px; border-radius: 5px; margin-bottom: 10px; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);">
+            <p style="font-size: 16px; color: #00897b;"><strong>Total Crimes in 2012:</strong> {total_2012:,}</p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     #summary stats
     st.write("Here's a summary of the data:")
