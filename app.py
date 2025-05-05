@@ -4,6 +4,7 @@ import pandas as pd
 import plotly.express as px
 import json
 import plotly.graph_objects as go
+from plotly.subplots import make_subplots
 
 st.set_page_config(layout="wide")
 
@@ -54,10 +55,7 @@ page = st.sidebar.radio("Select a Page", [
     "Basic Overview",
     "Crime Rate Trends",
     "Geographical Distribution",
-    "Crime Trends by District",
-    "Top/Bottom Districts",
-    "Crime Category Heatmap",
-    "Animated Crime Trends"])
+    "Advanced Insights",])
 
 #inital view of the dataset
 if page == "Basic Overview":
@@ -206,7 +204,7 @@ elif page == "Crime Rate Trends":
             st.error(f"An error occurred while creating the chart: {e}")
     
     #top and bottom 5 
-    st.header("6. Top and Bottom 5 Districts by Crime Rate")
+    st.header("Top and Bottom 5 Districts by Crime Rate")
     selected_year_rate = st.selectbox("Select Year", options=['2010', '2011', '2012'], key="year_rate")
     selected_year_rate = int(selected_year_rate)
 
@@ -309,8 +307,7 @@ elif page == "Geographical Distribution":
             marker_opacity=0.6,
             marker_line_width=1,
             hovertext=district_crime_counts['District'],
-            hoverinfo="text+z"
-        ))
+            hoverinfo="text+z"))
 
         fig.update_layout(
             mapbox_style="carto-positron",
@@ -319,8 +316,7 @@ elif page == "Geographical Distribution":
             mapbox_accesstoken=MAPBOX_TOKEN,
             margin={"r": 0, "t": 30, "l": 0, "b": 0},
             height=600,
-            title=f"Crime Distribution in Sri Lanka - {selected_year}"
-        )
+            title=f"Crime Distribution in Sri Lanka - {selected_year}")
 
         st.plotly_chart(fig, use_container_width=True)
 
@@ -328,50 +324,114 @@ elif page == "Geographical Distribution":
         st.error(f"An error occurred: {e}")
 
 #population vs crime count
-st.header("5.Crime vs. Population by Category")
-df.columns = df.columns.str.strip()
+elif page == "Advanced Insights":
+    st.header("5.Crime vs. Population by Category")
+    df.columns = df.columns.str.strip()
 
-df["Population"] = pd.to_numeric(df["Population"], errors='coerce')
-df["Crimes Over the Years"] = pd.to_numeric(df["Crimes Over the Years"], errors='coerce')
-df["Crime Percentage"] = pd.to_numeric(df["Crime Percentage"], errors='coerce')
+    df["Population"] = pd.to_numeric(df["Population"], errors='coerce')
+    df["Crimes Over the Years"] = pd.to_numeric(df["Crimes Over the Years"], errors='coerce')
+    df["Crime Percentage"] = pd.to_numeric(df["Crime Percentage"], errors='coerce')
 
-df = df.dropna(subset=["Population", "Crimes Over the Years", "Crime Percentage", "Crime Category"])
+    df = df.dropna(subset=["Population", "Crimes Over the Years", "Crime Percentage", "Crime Category"])
 
-fig = px.scatter(
-    df,
-    x="Population",
-    y="Crimes Over the Years",
-    color="Crime Category",
-    size="Crime Percentage",
-    hover_data=["District"],
-    title="Scatter Plot: Population vs. Crime, Colored by Crime Category",)
+    fig = px.scatter(
+        df,
+        x="Population",
+        y="Crimes Over the Years",
+        color="Crime Category",
+        size="Crime Percentage",
+        hover_data=["District"],
+        title="Scatter Plot: Population vs. Crime, Colored by Crime Category",)
 
-st.plotly_chart(fig)
+    st.plotly_chart(fig)
 
-#animated Chart over time
-st.header("7. Animated Crime Trends by District")
-try:
-    df_melted_animated = df.melt(id_vars=['District', 'Population'], value_vars=['2010', '2011', '2012'], var_name='Year',
-                                 value_name='Cases')
-    df_melted_animated['Year'] = pd.to_numeric(
-        df_melted_animated['Year'])
+    #population vs crime rate
+    st.header("Crime Rate vs Population Over Time by District")
+    try:
+        df_melted = df.melt(
+            id_vars=['District', 'Crime Category', 'Population'],
+            value_vars=['2010', '2011', '2012'],
+            var_name='Year',
+            value_name='Cases'
+        )
+        df_melted['Year'] = pd.to_numeric(df_melted['Year'])
+        df_melted['Crime Rate'] = (df_melted['Cases'] / df_melted['Population']) * 100000
 
-    df_melted_animated['Crime Rate'] = (df_melted_animated['Cases'] / df_melted_animated['Population']) * 100000
+        selected_district = st.selectbox("Select a District", df_melted['District'].unique())
 
-    fig_animated = px.bar(df_melted_animated,
-                             x='District',
-                             y='Crime Rate',
-                             color='District',
-                             animation_frame='Year',
-                             range_y=[0, df_melted_animated['Crime Rate'].max() * 1.1],
-                             title='Annual Crime Rate per 100,000 Population by District',
-                             labels={'Year': 'Year', 'Crime Rate': 'Crime Rate (per 100,000)'})
+        district_data = df_melted[df_melted['District'] == selected_district]
 
-    fig_animated.update_layout(
-        transition=dict(duration=300, easing="cubic-in-out"),
-        height=700
-    )
+        grouped = district_data.groupby('Year').agg({
+            'Cases': 'sum',
+            'Population': 'mean' }).reset_index()
 
-    st.plotly_chart(fig_animated, use_container_width=True)
-except Exception as e:
-    st.error(f"An error occurred: {e}")
+        grouped['Crime Rate'] = (grouped['Cases'] / grouped['Population']) * 100000
+
+        fig = go.Figure()
+
+        fig.add_trace(go.Scatter(
+            x=grouped['Year'],
+            y=grouped['Crime Rate'],
+            mode='lines+markers',
+            name='Crime Rate (per 100,000)',
+            line=dict(color='firebrick')))
+
+        fig.add_trace(go.Scatter(
+            x=grouped['Year'],
+            y=grouped['Population'],
+            mode='lines+markers',
+            name='Population',
+            yaxis='y2',
+            line=dict(color='royalblue')))
+
+        fig.update_layout(
+            title=f'Crime Rate vs Population Over Time in {selected_district}',
+            xaxis=dict(title='Year'),
+            yaxis=dict(title='Crime Rate (per 100,000)', color='firebrick'),
+            yaxis2=dict(
+                title='Population',
+                overlaying='y',
+                side='right',
+                color='royalblue'),
+            width=800,
+            height=500)
+
+        st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+
+
+    #pie charts to  show portions
+    st.header("Crime Category Proportions by Year in Selected District")
+
+    try:
+        selected_district = st.selectbox("Select a District", df['District'].unique(), key="district_pie_chart")
+
+        df_district = df[df['District'] == selected_district]
+
+        years = ['2010', '2011', '2012']
+
+        fig = make_subplots(rows=1, cols=3, specs=[[{'type':'domain'}]*3],
+                            subplot_titles=[f"Year {year}" for year in years])
+
+        for i, year in enumerate(years):
+            fig.add_trace(
+                go.Pie(
+                    labels=df_district['Crime Category'],
+                    values=df_district[year],
+                    name=f"Year {year}",
+                    textinfo='percent+label',
+                    hole=0.4
+                ),
+                row=1, col=i+1)
+
+        fig.update_layout(
+            title_text=f"Crime Category Distribution in {selected_district} (2010–2012)",
+            showlegend=False,
+            width=1000,
+            height=600)
+        st.plotly_chart(fig, use_container_width=True)
+
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
