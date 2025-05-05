@@ -1,16 +1,7 @@
-<<<<<<< HEAD
-import seaborn as sns
+import seaborn
 import streamlit as st
 import pandas as pd
 import plotly.express as px
 import json
 import plotly.graph_objects as go
-=======
-import seaborn as sns
-import streamlit as st
-import pandas as pd
-import plotly.express as px
-import json
-import plotly.graph_objects as go
->>>>>>> 778cd4df4a567d8a69c43802bf010698db6c0ee6
 from plotly.subplots import make_subplots
