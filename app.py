@@ -134,7 +134,6 @@ elif page == "Geographical Distribution":
     selected_crime = st.selectbox("Select Crime Category", options=crime_categories)
 
     try:
-        # Correct common typos or mismatches
         district_corrections = {
             'Mulathivu': 'Mullaitivu',
             'Mulllativu': 'Mullaitivu',
@@ -143,11 +142,9 @@ elif page == "Geographical Distribution":
         }
         df['District'] = df['District'].replace(district_corrections)
 
-        # Filter by selected crime
         filtered_df = df[df['Crime Category'] == selected_crime].copy()
         filtered_df['Crime Rate'] = (filtered_df[str(selected_year)] / filtered_df['Population']) * 100000
 
-        # Ensure all districts are represented, even with 0 crimes
         all_districts = df['District'].unique()
         base_df = pd.DataFrame({'District': all_districts})
         merged_df = base_df.merge(filtered_df[['District', 'Crime Rate']], on='District', how='left')
