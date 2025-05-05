@@ -5,3 +5,5 @@ import plotly.express as px
 import json
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
+
+seaborn==0.11.2  # Replace with the desired version
