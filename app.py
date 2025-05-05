@@ -324,7 +324,7 @@ elif page == "Geographical Distribution":
 
 #population vs crime count
 elif page == "Advanced Insights":
-    st.header("5.Crime vs. Population by Category")
+    st.header("Crime vs. Population by Category")
     df.columns = df.columns.str.strip()
 
     df["Population"] = pd.to_numeric(df["Population"], errors='coerce')
@@ -402,12 +402,12 @@ elif page == "Advanced Insights":
 
 
     #pie charts to  show portions
-    st.header("Crime Category Proportions by Year in Selected District")
+    st.header("Crime Occurrences by District for Selected Crime Category")
 
     try:
-        selected_district = st.selectbox("Select a District", df['District'].unique(), key="district_pie_chart")
+        selected_category = st.selectbox("Select a Crime Category", df['Crime Category'].unique(), key="crime_category_pie_chart")
 
-        df_district = df[df['District'] == selected_district]
+        df_category = df[df['Crime Category'] == selected_category]
 
         years = ['2010', '2011', '2012']
 
@@ -417,8 +417,8 @@ elif page == "Advanced Insights":
         for i, year in enumerate(years):
             fig.add_trace(
                 go.Pie(
-                    labels=df_district['Crime Category'],
-                    values=df_district[year],
+                    labels=df_category['District'],
+                    values=df_category[year],
                     name=f"Year {year}",
                     textinfo='percent+label',
                     hole=0.4
@@ -426,10 +426,11 @@ elif page == "Advanced Insights":
                 row=1, col=i+1)
 
         fig.update_layout(
-            title_text=f"Crime Category Distribution in {selected_district} (2010–2012)",
+            title_text=f"Occurrences of '{selected_category}' Crime Across Districts (2010–2012)",
             showlegend=False,
             width=1000,
             height=600)
+        
         st.plotly_chart(fig, use_container_width=True)
 
     except Exception as e:
