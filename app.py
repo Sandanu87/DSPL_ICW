@@ -5,14 +5,13 @@ import json
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-st.set_page_config(layout="wide")
+st.set_page_config(layout="wide")   
 
 try:
     df = pd.read_csv("crime_data_2010_1012.csv")
 except FileNotFoundError:
     st.error("Could not find the data file.")
     st.stop()
-
 df['District'] = df['District'].astype(str)
 
 st.title("Sri Lankan Crime Statistics Dashboard")
