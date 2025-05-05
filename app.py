@@ -13,6 +13,8 @@ except FileNotFoundError:
 
 df['District'] = df['District'].astype(str)
 
+st.title("Sri Lankan Crime Statistics Dashboard")
+
 # shortening district names
 district_mapping = {
     'Badulla (Badulla & Bandarawela )': 'Badulla',
@@ -43,33 +45,45 @@ crime_category_mapping = {
     'Theft of Property including praedial produce over Rs. 5000/ & cycle cattle theft  irrrespective of their value ': 'Theft <= 5000'}
 df['Crime Category'] = df['Crime Category'].replace(crime_category_mapping)
 
-#inital view of the dataset
-st.title("Sri Lankan Crime Statistics Dashboard")
-st.write("This dashboard provides an interactive insights of crime statistics in Sri Lanka. This allows users to explore crime trends, geographical distribution and overall summaries which enables data driven decision making for government authorities. ")
-st.write("Here's a inital glance at the data:")
-st.dataframe(df.head())
+#Navigation bar
+st.sidebar.title("Navigation")
+page = st.sidebar.radio("Select a Page", [
+    "Initial Data Exploration",
+    "Crime Rate Trends",
+    "Geographical Distribution",
+    "Crime Trends by District",
+    "Top/Bottom Districts",
+    "Crime Category Heatmap",
+    "Animated Crime Trends"])
 
-#summary stats
-st.write("Here's a summary of the data:")
-st.dataframe(df.describe())
+#inital view of the dataset
+if page == "Initial Data Exploration":
+    st.write("This dashboard provides an interactive insights of crime statistics in Sri Lanka. This allows users to explore crime trends, geographical distribution and overall summaries which enables data driven decision making for government authorities. ")
+    st.write("Here's a inital glance at the data:")
+    st.dataframe(df.head())
+
+    #summary stats
+    st.write("Here's a summary of the data:")
+    st.dataframe(df.describe())
 
 #crime trends overtime by district
-st.header("1. Crime Trends Over Time by District")
-try:
-    df_melted = df.melt(id_vars=['District'], value_vars=['2010', '2011', '2012'], var_name='Year', value_name='Total Crimes')
-    df_melted['Year'] = pd.to_numeric(df_melted['Year']) 
+elif page == "Crime Rate Trends":
+    st.header("1. Crime Trends Over Time by District")
+    try:
+        df_melted = df.melt(id_vars=['District'], value_vars=['2010', '2011', '2012'], var_name='Year', value_name='Total Crimes')
+        df_melted['Year'] = pd.to_numeric(df_melted['Year']) 
 
-    selected_district = st.selectbox("Select a District", df_melted['District'].unique())
+        selected_district = st.selectbox("Select a District", df_melted['District'].unique())
 
-    district_data = df_melted[df_melted['District'] == selected_district]
+        district_data = df_melted[df_melted['District'] == selected_district]
 
-    fig = px.bar(district_data, x='Year', y='Total Crimes',
-                  title=f'Crime Trends in {selected_district}',
-                  labels={'Year': 'Year', 'Total Crimes': 'Total Crimes'}) 
-    st.plotly_chart(fig, use_container_width=True) 
+        fig = px.bar(district_data, x='Year', y='Total Crimes',
+                    title=f'Crime Trends in {selected_district}',
+                    labels={'Year': 'Year', 'Total Crimes': 'Total Crimes'}) 
+        st.plotly_chart(fig, use_container_width=True) 
 
-except Exception as e:
-    st.error(f"An error occurred: {e}")
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
 
 #Crime trends overtime
 st.header("2. Crime Rate Trends Over Time")
